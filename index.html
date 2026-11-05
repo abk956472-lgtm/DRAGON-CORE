@@ -3,57 +3,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DRAGON CORE CONTROL</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DRAGON CORE</title>
 
 <style>
 *{box-sizing:border-box}
 body{
  margin:0;background:#030812;color:#d8f4ff;
- font-family:Arial,sans-serif;overflow-x:hidden;
+ font-family:Arial,sans-serif;
 }
-header{
- padding:22px;text-align:center;
- border-bottom:1px solid #12354d;
- letter-spacing:4px;
-}
-header h1{color:#32caff;margin:0;font-size:27px}
+header{text-align:center;padding:22px;border-bottom:1px solid #12354d}
+header h1{color:#32caff;letter-spacing:4px}
 header p{color:#64899f;font-size:11px;letter-spacing:3px}
-main{max-width:1100px;margin:auto;padding:20px}
+main{max-width:850px;margin:auto;padding:18px}
 .globe-area{
- height:390px;position:relative;
+ height:340px;position:relative;overflow:hidden;
  border:1px solid #10334b;border-radius:18px;
- background:radial-gradient(ellipse,#102a46 0%,#06111f 48%,#030812 80%);
- overflow:hidden;
+ background:radial-gradient(ellipse,#102a46,#030812 80%);
 }
 #globe{width:100%;height:100%;display:block}
-.globe-label{
- position:absolute;top:15px;left:18px;
- color:#47d5ff;font-size:11px;letter-spacing:2px;
- pointer-events:none;
-}
-.cards{
- display:grid;grid-template-columns:repeat(3,1fr);
- gap:12px;margin-top:18px;
-}
-.card{
+.globe-label{position:absolute;top:15px;left:15px;color:#47d5ff;font-size:11px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.card,.console{
  background:#091725;border:1px solid #15364e;
- border-radius:12px;padding:20px;
+ border-radius:14px;padding:20px;margin-top:12px;
 }
-.card small{color:#7294a9;letter-spacing:2px}
-.value{font-size:20px;margin-top:12px;color:#42d5ff}
+small{color:#7294a9;letter-spacing:1px}
+.value{font-size:22px;margin-top:12px;color:#42d5ff}
 .green{color:#42e6a4}
 .orange{color:#ffbd58}
-.console{
- margin-top:18px;background:#050e18;
- border:1px solid #15364e;border-radius:12px;padding:18px;
+.red{color:#ff626c}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+button{
+ padding:16px 8px;border:1px solid #1685ad;
+ border-radius:10px;background:#08253a;
+ color:#58dfff;font-weight:bold;font-size:14px;
 }
-.console h3{color:#43d5ff;font-size:13px}
-#log{font-family:monospace;color:#75d7ae;font-size:12px;line-height:2}
+button:disabled{opacity:.4}
+.stop{border-color:#a34a55;color:#ff8990}
+.console{font-family:monospace;font-size:12px;line-height:2;overflow-wrap:anywhere}
+.console h3{font-family:Arial;color:#43d5ff}
+#log{color:#75d7ae;max-height:220px;overflow:auto}
 footer{text-align:center;color:#466579;padding:25px;font-size:11px}
-@media(max-width:600px){
+@media(max-width:500px){
  .cards{grid-template-columns:1fr}
- .globe-area{height:320px}
+ .globe-area{height:300px}
 }
 </style>
 </head>
@@ -65,42 +59,58 @@ footer{text-align:center;color:#466579;padding:25px;font-size:11px}
 </header>
 
 <main>
- <section class="globe-area">
-  <div class="globe-label">GLOBAL NETWORK MONITOR</div>
-  <canvas id="globe"></canvas>
- </section>
 
- <section class="cards">
-  <div class="card">
-   <small>NETWORK STATUS</small>
-   <div class="value orange" id="network">NOT TESTED</div>
-  </div>
-  <div class="card">
-   <small>TUNNEL STATUS</small>
-   <div class="value" id="tunnel">STANDBY</div>
-  </div>
-  <div class="card">
-   <small>EMERGENCY TIMER</small>
-   <div class="value green" id="timer">05:00</div>
-  </div>
- </section>
+<section class="globe-area">
+ <div class="globe-label">GLOBAL NETWORK MONITOR</div>
+ <canvas id="globe"></canvas>
+</section>
 
- <section class="console">
-  <h3>DRAGON SYSTEM CONSOLE</h3>
-  <div id="log">
-   [SYSTEM] DRAGON CORE INITIALIZED<br>
-   [SYSTEM] 3D GLOBE LOADED<br>
-   [SYSTEM] WAITING FOR NETWORK ENGINE...
-  </div>
- </section>
+<section class="cards">
+ <div class="card">
+  <small>NETWORK STATUS</small>
+  <div class="value orange" id="network">NOT TESTED</div>
+ </div>
+
+ <div class="card">
+  <small>RESPONSE TIME</small>
+  <div class="value" id="latency">-- ms</div>
+ </div>
+
+ <div class="card">
+  <small>EMERGENCY SESSION</small>
+  <div class="value" id="tunnel">STANDBY</div>
+ </div>
+
+ <div class="card">
+  <small>REMAINING TIME</small>
+  <div class="value green" id="timer">05:00</div>
+ </div>
+</section>
+
+<section class="controls">
+ <button id="scan">🔍 SCAN NETWORK</button>
+ <button id="start">🚨 EMERGENCY MODE</button>
+ <button id="stop" class="stop" disabled>STOP SESSION</button>
+ <button id="clear">CLEAR LOG</button>
+</section>
+
+<section class="console">
+ <h3>DRAGON SYSTEM CONSOLE</h3>
+ <div id="log">
+  [SYSTEM] DRAGON CORE INITIALIZED<br>
+  [SYSTEM] NETWORK ENGINE READY<br>
+  [SYSTEM] WAITING FOR COMMAND...
+ </div>
+</section>
+
 </main>
 
-<footer>DRAGON CORE © 2026 | DEVELOPED BY DRAGON</footer>
+<footer>DRAGON CORE v1.1 | DEVELOPED BY DRAGON</footer>
 
 <script type="importmap">
 {
- "imports": {
-  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
  }
 }
 </script>
@@ -108,100 +118,89 @@ footer{text-align:center;color:#466579;padding:25px;font-size:11px}
 <script type="module">
 import * as THREE from "three";
 
-const canvas = document.getElementById("globe");
-const scene = new THREE.Scene();
+const canvas=document.getElementById("globe");
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(45,1,.1,100);
+camera.position.z=4.2;
 
-const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
-camera.position.z = 4.2;
-
-const renderer = new THREE.WebGLRenderer({
+const renderer=new THREE.WebGLRenderer({
  canvas,antialias:true,alpha:true
 });
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 
 scene.add(new THREE.AmbientLight(0x6688aa,2));
 
-const light = new THREE.PointLight(0x38bfff,45);
+const light=new THREE.PointLight(0x38bfff,45);
 light.position.set(3,3,4);
 scene.add(light);
 
-const earth = new THREE.Group();
+const earth=new THREE.Group();
 scene.add(earth);
 
-const sphere = new THREE.Mesh(
+const sphere=new THREE.Mesh(
  new THREE.SphereGeometry(1,64,64),
  new THREE.MeshPhongMaterial({
   color:0x14558b,
   emissive:0x061d3c,
-  shininess:35,
-  specular:0x55caff
+  shininess:35
  })
 );
 earth.add(sphere);
 
-// Geographic grid
-const gridMaterial = new THREE.LineBasicMaterial({
- color:0x38bfff,transparent:true,opacity:0.28
+const gridMaterial=new THREE.LineBasicMaterial({
+ color:0x38bfff,transparent:true,opacity:.35
 });
 
-function circle(points){
- const geometry = new THREE.BufferGeometry()
-  .setFromPoints(points);
- earth.add(new THREE.LineLoop(geometry,gridMaterial));
+function addLine(points){
+ const geometry=new THREE.BufferGeometry().setFromPoints(points);
+ earth.add(new THREE.Line(geometry,gridMaterial));
 }
 
 for(let lat=-75;lat<=75;lat+=15){
  const points=[];
  const r=Math.cos(lat*Math.PI/180);
  const y=Math.sin(lat*Math.PI/180);
- for(let i=0;i<128;i++){
+ for(let i=0;i<=128;i++){
   const a=i/128*Math.PI*2;
-  points.push(new THREE.Vector3(
-   r*Math.cos(a),y,r*Math.sin(a)
-  ));
+  points.push(new THREE.Vector3(r*Math.cos(a),y,r*Math.sin(a)));
  }
- circle(points);
+ addLine(points);
 }
 
 for(let lon=0;lon<180;lon+=15){
  const points=[];
  const a=lon*Math.PI/180;
- for(let i=0;i<128;i++){
-  const t=i/127*Math.PI*2;
+ for(let i=0;i<=128;i++){
+  const t=i/128*Math.PI*2;
   points.push(new THREE.Vector3(
    Math.sin(t)*Math.sin(a),
    Math.cos(t),
    Math.sin(t)*Math.cos(a)
   ));
  }
- circle(points);
+ addLine(points);
 }
 
-// Atmosphere
-const atmosphere = new THREE.Mesh(
+const atmosphere=new THREE.Mesh(
  new THREE.SphereGeometry(1.09,48,48),
  new THREE.MeshBasicMaterial({
-  color:0x168dff,
-  transparent:true,
-  opacity:0.09,
-  side:THREE.BackSide
+  color:0x168dff,transparent:true,
+  opacity:.09,side:THREE.BackSide
  })
 );
 earth.add(atmosphere);
 
-// Network points
 for(let i=0;i<35;i++){
- const lat=(Math.random()-0.5)*Math.PI;
+ const lat=(Math.random()-.5)*Math.PI;
  const lon=Math.random()*Math.PI*2;
- const r=1.012;
  const dot=new THREE.Mesh(
-  new THREE.SphereGeometry(0.012,8,8),
+  new THREE.SphereGeometry(.012,8,8),
   new THREE.MeshBasicMaterial({color:0x65edff})
  );
  dot.position.set(
-  r*Math.cos(lat)*Math.cos(lon),
-  r*Math.sin(lat),
-  r*Math.cos(lat)*Math.sin(lon)
+  1.012*Math.cos(lat)*Math.cos(lon),
+  1.012*Math.sin(lat),
+  1.012*Math.cos(lat)*Math.sin(lon)
  );
  earth.add(dot);
 }
@@ -218,11 +217,152 @@ resize();
 
 function animate(){
  requestAnimationFrame(animate);
- earth.rotation.y+=0.0025;
- earth.rotation.x=0.08;
+ earth.rotation.y+=.0025;
  renderer.render(scene,camera);
 }
 animate();
+
+// DRAGON NETWORK ENGINE
+
+const $=id=>document.getElementById(id);
+let running=false;
+let sessionEnd=0;
+let timerInterval=null;
+let scanInterval=null;
+let busy=false;
+
+function log(message){
+ const time=new Date().toLocaleTimeString();
+ const line=document.createElement("div");
+ line.textContent=`[${time}] ${message}`;
+ $("log").prepend(line);
+}
+
+async function testEndpoint(url){
+ const controller=new AbortController();
+ const timeout=setTimeout(()=>controller.abort(),7000);
+ const start=performance.now();
+
+ try{
+  await fetch(url,{
+   mode:"no-cors",
+   cache:"no-store",
+   signal:controller.signal
+  });
+  return {
+   online:true,
+   latency:Math.round(performance.now()-start)
+  };
+ }catch(error){
+  return {online:false,latency:null};
+ }finally{
+  clearTimeout(timeout);
+ }
+}
+
+async function scanNetwork(){
+ if(busy)return;
+ busy=true;
+ $("scan").disabled=true;
+ $("network").textContent="TESTING...";
+ $("network").className="value orange";
+
+ const endpoints=[
+  "https://www.gstatic.com/generate_204",
+  "https://www.cloudflare.com/cdn-cgi/trace"
+ ];
+
+ let result={online:false,latency:null};
+
+ for(const endpoint of endpoints){
+  result=await testEndpoint(endpoint);
+  if(result.online)break;
+ }
+
+ if(result.online){
+  $("network").textContent="ONLINE";
+  $("network").className="value green";
+  $("latency").textContent=result.latency+" ms";
+  log("INTERNET ACCESSIBLE | "+result.latency+" ms");
+ }else{
+  $("network").textContent="OFFLINE";
+  $("network").className="value red";
+  $("latency").textContent="-- ms";
+  log("NO EXTERNAL CONNECTION DETECTED");
+ }
+
+ $("scan").disabled=false;
+ busy=false;
+ return result.online;
+}
+
+$("scan").onclick=scanNetwork;
+
+function updateTimer(){
+ const remaining=Math.max(0,Math.ceil((sessionEnd-Date.now())/1000));
+ const min=String(Math.floor(remaining/60)).padStart(2,"0");
+ const sec=String(remaining%60).padStart(2,"0");
+ $("timer").textContent=min+":"+sec;
+
+ if(remaining<=0)stopSession();
+}
+
+async function emergencyCheck(){
+ if(!running)return;
+ await scanNetwork();
+}
+
+function startSession(){
+ if(running)return;
+
+ running=true;
+ sessionEnd=Date.now()+300000;
+
+ $("tunnel").textContent="MONITORING";
+ $("tunnel").className="value green";
+ $("start").disabled=true;
+ $("stop").disabled=false;
+
+ log("EMERGENCY MONITORING STARTED");
+ log("SESSION LENGTH: 300 SECONDS");
+
+ updateTimer();
+ emergencyCheck();
+
+ timerInterval=setInterval(updateTimer,1000);
+ scanInterval=setInterval(emergencyCheck,5000);
+}
+
+function stopSession(){
+ if(!running)return;
+
+ running=false;
+ clearInterval(timerInterval);
+ clearInterval(scanInterval);
+
+ $("tunnel").textContent="STANDBY";
+ $("tunnel").className="value";
+ $("start").disabled=false;
+ $("stop").disabled=true;
+
+ log("EMERGENCY MONITORING STOPPED");
+}
+
+$("start").onclick=startSession;
+$("stop").onclick=stopSession;
+
+$("clear").onclick=()=>{
+ $("log").textContent="";
+ log("LOG CLEARED");
+};
+
+window.addEventListener("online",()=>{
+ log("DEVICE REPORTS NETWORK ONLINE");
+});
+
+window.addEventListener("offline",()=>{
+ log("DEVICE REPORTS NETWORK OFFLINE");
+});
 </script>
 </body>
 </html>
