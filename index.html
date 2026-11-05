@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAGON CORE CONTROL</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#030812;color:#d8f4ff;
+ font-family:Arial,sans-serif;overflow-x:hidden;
+}
+header{
+ padding:22px;text-align:center;
+ border-bottom:1px solid #12354d;
+ letter-spacing:4px;
+}
+header h1{color:#32caff;margin:0;font-size:27px}
+header p{color:#64899f;font-size:11px;letter-spacing:3px}
+main{max-width:1100px;margin:auto;padding:20px}
+.globe-area{
+ height:390px;position:relative;
+ border:1px solid #10334b;border-radius:18px;
+ background:radial-gradient(ellipse,#102a46 0%,#06111f 48%,#030812 80%);
+ overflow:hidden;
+}
+#globe{width:100%;height:100%;display:block}
+.globe-label{
+ position:absolute;top:15px;left:18px;
+ color:#47d5ff;font-size:11px;letter-spacing:2px;
+ pointer-events:none;
+}
+.cards{
+ display:grid;grid-template-columns:repeat(3,1fr);
+ gap:12px;margin-top:18px;
+}
+.card{
+ background:#091725;border:1px solid #15364e;
+ border-radius:12px;padding:20px;
+}
+.card small{color:#7294a9;letter-spacing:2px}
+.value{font-size:20px;margin-top:12px;color:#42d5ff}
+.green{color:#42e6a4}
+.orange{color:#ffbd58}
+.console{
+ margin-top:18px;background:#050e18;
+ border:1px solid #15364e;border-radius:12px;padding:18px;
+}
+.console h3{color:#43d5ff;font-size:13px}
+#log{font-family:monospace;color:#75d7ae;font-size:12px;line-height:2}
+footer{text-align:center;color:#466579;padding:25px;font-size:11px}
+@media(max-width:600px){
+ .cards{grid-template-columns:1fr}
+ .globe-area{height:320px}
+}
+</style>
+</head>
+
+<body>
+<header>
+ <h1>🐉 DRAGON CORE</h1>
+ <p>EMERGENCY CONNECTIVITY SYSTEM</p>
+</header>
+
+<main>
+ <section class="globe-area">
+  <div class="globe-label">GLOBAL NETWORK MONITOR</div>
+  <canvas id="globe"></canvas>
+ </section>
+
+ <section class="cards">
+  <div class="card">
+   <small>NETWORK STATUS</small>
+   <div class="value orange" id="network">NOT TESTED</div>
+  </div>
+  <div class="card">
+   <small>TUNNEL STATUS</small>
+   <div class="value" id="tunnel">STANDBY</div>
+  </div>
+  <div class="card">
+   <small>EMERGENCY TIMER</small>
+   <div class="value green" id="timer">05:00</div>
+  </div>
+ </section>
+
+ <section class="console">
+  <h3>DRAGON SYSTEM CONSOLE</h3>
+  <div id="log">
+   [SYSTEM] DRAGON CORE INITIALIZED<br>
+   [SYSTEM] 3D GLOBE LOADED<br>
+   [SYSTEM] WAITING FOR NETWORK ENGINE...
+  </div>
+ </section>
+</main>
+
+<footer>DRAGON CORE © 2026 | DEVELOPED BY DRAGON</footer>
+
+<script type="importmap">
+{
+ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+ }
+}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+
+const canvas = document.getElementById("globe");
+const scene = new THREE.Scene();
+
+const camera = new THREE.PerspectiveCamera(45,1,0.1,100);
+camera.position.z = 4.2;
+
+const renderer = new THREE.WebGLRenderer({
+ canvas,antialias:true,alpha:true
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+
+scene.add(new THREE.AmbientLight(0x6688aa,2));
+
+const light = new THREE.PointLight(0x38bfff,45);
+light.position.set(3,3,4);
+scene.add(light);
+
+const earth = new THREE.Group();
+scene.add(earth);
+
+const sphere = new THREE.Mesh(
+ new THREE.SphereGeometry(1,64,64),
+ new THREE.MeshPhongMaterial({
+  color:0x14558b,
+  emissive:0x061d3c,
+  shininess:35,
+  specular:0x55caff
+ })
+);
+earth.add(sphere);
+
+// Geographic grid
+const gridMaterial = new THREE.LineBasicMaterial({
+ color:0x38bfff,transparent:true,opacity:0.28
+});
+
+function circle(points){
+ const geometry = new THREE.BufferGeometry()
+  .setFromPoints(points);
+ earth.add(new THREE.LineLoop(geometry,gridMaterial));
+}
+
+for(let lat=-75;lat<=75;lat+=15){
+ const points=[];
+ const r=Math.cos(lat*Math.PI/180);
+ const y=Math.sin(lat*Math.PI/180);
+ for(let i=0;i<128;i++){
+  const a=i/128*Math.PI*2;
+  points.push(new THREE.Vector3(
+   r*Math.cos(a),y,r*Math.sin(a)
+  ));
+ }
+ circle(points);
+}
+
+for(let lon=0;lon<180;lon+=15){
+ const points=[];
+ const a=lon*Math.PI/180;
+ for(let i=0;i<128;i++){
+  const t=i/127*Math.PI*2;
+  points.push(new THREE.Vector3(
+   Math.sin(t)*Math.sin(a),
+   Math.cos(t),
+   Math.sin(t)*Math.cos(a)
+  ));
+ }
+ circle(points);
+}
+
+// Atmosphere
+const atmosphere = new THREE.Mesh(
+ new THREE.SphereGeometry(1.09,48,48),
+ new THREE.MeshBasicMaterial({
+  color:0x168dff,
+  transparent:true,
+  opacity:0.09,
+  side:THREE.BackSide
+ })
+);
+earth.add(atmosphere);
+
+// Network points
+for(let i=0;i<35;i++){
+ const lat=(Math.random()-0.5)*Math.PI;
+ const lon=Math.random()*Math.PI*2;
+ const r=1.012;
+ const dot=new THREE.Mesh(
+  new THREE.SphereGeometry(0.012,8,8),
+  new THREE.MeshBasicMaterial({color:0x65edff})
+ );
+ dot.position.set(
+  r*Math.cos(lat)*Math.cos(lon),
+  r*Math.sin(lat),
+  r*Math.cos(lat)*Math.sin(lon)
+ );
+ earth.add(dot);
+}
+
+function resize(){
+ const w=canvas.clientWidth;
+ const h=canvas.clientHeight;
+ camera.aspect=w/h;
+ camera.updateProjectionMatrix();
+ renderer.setSize(w,h,false);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function animate(){
+ requestAnimationFrame(animate);
+ earth.rotation.y+=0.0025;
+ earth.rotation.x=0.08;
+ renderer.render(scene,camera);
+}
+animate();
+</script>
+</body>
+</html>
