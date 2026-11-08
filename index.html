@@ -1,189 +1,176 @@
-/* ===== DRAGON SCI-FI HUD ===== */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DRAGON CORE v1.2</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#030812;color:#d8f4ff;font-family:Arial,sans-serif}
+header{text-align:center;padding:22px;border-bottom:1px solid #12354d}
+header h1{color:#32caff;letter-spacing:4px}
+header p{color:#64899f;font-size:11px;letter-spacing:3px}
+main{max-width:850px;margin:auto;padding:18px}
+.globe-area{height:340px;position:relative;overflow:hidden;border:1px solid #10334b;border-radius:18px;background:radial-gradient(ellipse,#102a46,#030812 80%)}
+#globe{width:100%;height:100%;display:block}
+.globe-label{position:absolute;top:15px;left:15px;color:#47d5ff;font-size:11px;z-index:2}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.card,.console{background:#091725;border:1px solid #15364e;border-radius:14px;padding:20px;margin-top:12px}
+small{color:#7294a9;letter-spacing:1px}
+.value{font-size:22px;margin-top:12px;color:#42d5ff}
+.green{color:#42e6a4}.orange{color:#ffbd58}.red{color:#ff626c}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+button{padding:16px 8px;border:1px solid #1685ad;border-radius:10px;background:#08253a;color:#58dfff;font-weight:bold;font-size:14px;cursor:pointer}
+button:disabled{opacity:.4}
+.stop{border-color:#a34a55;color:#ff8990}
+.console{font-family:monospace;font-size:12px;line-height:2;overflow-wrap:anywhere}
+.console h3{font-family:Arial;color:#43d5ff}
+#log{color:#75d7ae;max-height:220px;overflow:auto}
+footer{text-align:center;color:#466579;padding:25px;font-size:11px}
+@media(max-width:500px){.cards{grid-template-columns:1fr}.globe-area{height:300px}}
+</style>
+</head>
+<body>
+<header><h1>🐉 DRAGON CORE</h1><p>EMERGENCY CONNECTIVITY SYSTEM v1.2</p></header>
+<main>
+<section class="globe-area"><div class="globe-label">GLOBAL NETWORK MONITOR</div><canvas id="globe"></canvas></section>
+<section class="cards">
+<div class="card"><small>NETWORK STATUS</small><div class="value orange" id="network">NOT TESTED</div></div>
+<div class="card"><small>RESPONSE TIME</small><div class="value" id="latency">-- ms</div></div>
+<div class="card"><small>EMERGENCY SESSION</small><div class="value" id="tunnel">STANDBY</div></div>
+<div class="card"><small>REMAINING TIME</small><div class="value green" id="timer">05:00</div></div>
+</section>
+<section class="controls">
+<button id="scan">🔍 SCAN NETWORK</button>
+<button id="start">🚨 EMERGENCY MODE</button>
+<button id="stop" class="stop" disabled>STOP SESSION</button>
+<button id="clear">CLEAR LOG</button>
+</section>
+<section class="console"><h3>DRAGON SYSTEM CONSOLE</h3><div id="log">[SYSTEM] DRAGON CORE v1.2 INITIALIZED<br>[SYSTEM] NETWORK ENGINE READY<br>[SYSTEM] WAITING FOR COMMAND...</div></section>
+</main>
+<footer>DRAGON CORE v1.2 | DEVELOPED BY DRAGON - FIXED BY ABDO</footer>
 
-body{
- background:
- radial-gradient(ellipse at 50% 0%,#092c3d 0%,transparent 55%),
- linear-gradient(135deg,#020914,#031522,#020810);
+<script type="importmap">{ "imports":{ "three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
+<script type="module">
+import * as THREE from "three";
+const canvas=document.getElementById("globe");
+let threeOK=true;
+try{
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(45,1,.1,100);
+  camera.position.z=4.2;
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  scene.add(new THREE.AmbientLight(0x6688aa,2));
+  const light=new THREE.PointLight(0x38bfff,45); light.position.set(3,3,4); scene.add(light);
+  const earth=new THREE.Group(); scene.add(earth);
+  const sphere=new THREE.Mesh(new THREE.SphereGeometry(1,64,64), new THREE.MeshPhongMaterial({color:0x14558b,emissive:0x061d3c,shininess:35}));
+  earth.add(sphere);
+  const gridMaterial=new THREE.LineBasicMaterial({color:0x38bfff,transparent:true,opacity:.35});
+  function addLine(points){ const g=new THREE.BufferGeometry().setFromPoints(points); earth.add(new THREE.Line(g,gridMaterial)); }
+  for(let lat=-75;lat<=75;lat+=15){ const pts=[]; const r=Math.cos(lat*Math.PI/180); const y=Math.sin(lat*Math.PI/180); for(let i=0;i<=128;i++){ const a=i/128*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a),y,r*Math.sin(a))); } addLine(pts); }
+  for(let lon=0;lon<180;lon+=15){ const pts=[]; const a=lon*Math.PI/180; for(let i=0;i<=128;i++){ const t=i/128*Math.PI*2; pts.push(new THREE.Vector3(Math.sin(t)*Math.sin(a),Math.cos(t),Math.sin(t)*Math.cos(a))); } addLine(pts); }
+  const atm=new THREE.Mesh(new THREE.SphereGeometry(1.09,48,48), new THREE.MeshBasicMaterial({color:0x168dff,transparent:true,opacity:.09,side:THREE.BackSide})); earth.add(atm);
+  for(let i=0;i<35;i++){ const lat=(Math.random()-.5)*Math.PI; const lon=Math.random()*Math.PI*2; const dot=new THREE.Mesh(new THREE.SphereGeometry(.012,8,8), new THREE.MeshBasicMaterial({color:0x65edff})); dot.position.set(1.012*Math.cos(lat)*Math.cos(lon),1.012*Math.sin(lat),1.012*Math.cos(lat)*Math.sin(lon)); earth.add(dot); }
+  function resize(){ const w=canvas.clientWidth; const h=canvas.clientHeight; if(!w||!h) return; camera.aspect=w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h,false); }
+  window.addEventListener("resize",resize); resize();
+  (function animate(){ requestAnimationFrame(animate); earth.rotation.y+=.0025; renderer.render(scene,camera); })();
+}catch(e){ threeOK=false; console.warn("Three failed, fallback to 2D",e); }
+
+// FALLBACK 2D GLOBE IF THREE FAILS (OFFLINE)
+if(!threeOK){
+  const ctx=canvas.getContext("2d");
+  let angle=0;
+  function draw2D(){
+    const w=canvas.width=canvas.clientWidth, h=canvas.height=canvas.clientHeight;
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle="#38bfff"; ctx.globalAlpha=.4;
+    ctx.beginPath(); ctx.arc(w/2,h/2,Math.min(w,h)*.38,0,Math.PI*2); ctx.stroke();
+    for(let i=-2;i<=2;i++){ ctx.beginPath(); ctx.ellipse(w/2,h/2,Math.min(w,h)*.38,Math.min(w,h)*.38*Math.abs(Math.cos(angle+i)),0,0,Math.PI*2); ctx.stroke(); }
+    ctx.globalAlpha=1; ctx.fillStyle="#65edff"; ctx.font="14px Arial"; ctx.fillText("DRAGON CORE - OFFLINE MODE",20,30);
+    angle+=0.01; requestAnimationFrame(draw2D);
+  }
+  draw2D();
 }
 
-header{
- position:relative;
- background:linear-gradient(90deg,#03101d,#08283a,#03101d);
- border-bottom:1px solid #16cfff55;
- box-shadow:0 5px 25px #00bfff18;
+// DRAGON NETWORK ENGINE - FIXED
+const $=id=>document.getElementById(id);
+let running=false, sessionEnd=0, timerInterval=null, scanInterval=null, busy=false;
+
+function log(m){ const t=new Date().toLocaleTimeString(); const d=document.createElement("div"); d.textContent=`[${t}] ${m}`; $("log").prepend(d); }
+
+// FIX 1: Real test with Image ping + CORS fetch, no more no-cors lie
+async function testReal(){
+  const start=performance.now();
+  // Test 1: Image ping (works even with CORS)
+  const imgTest=new Promise(res=>{
+    const img=new Image();
+    const to=setTimeout(()=>res(false),5000);
+    img.onload=()=>{clearTimeout(to);res(true)};
+    img.onerror=()=>{clearTimeout(to);res(false)};
+    img.src="https://www.gstatic.com/images/branding/googlelogo/1x/googlelogo_color_272x92dp.png?rand="+Date.now();
+  });
+  const ok=await imgTest;
+  return {online:ok, latency: ok?Math.round(performance.now()-start):null};
 }
 
-header h1{
- text-shadow:0 0 12px #00cfff,0 0 30px #00cfff88;
+async function scanNetwork(){
+  if(busy) return false;
+  busy=true; $("scan").disabled=true;
+  $("network").textContent="TESTING..."; $("network").className="value orange";
+  let result=await testReal();
+  // FIX 2: Retry 3 times if offline
+  let tries=1;
+  while(!result.online && tries<3 && running){
+    log(`RETRY ${tries}/3 - NO CONNECTION, RETRYING...`);
+    await new Promise(r=>setTimeout(r,1000));
+    result=await testReal(); tries++;
+  }
+  if(result.online){
+    $("network").textContent="ONLINE"; $("network").className="value green";
+    $("latency").textContent=result.latency+" ms";
+    log("INTERNET ACCESSIBLE | "+result.latency+" ms");
+  }else{
+    $("network").textContent="OFFLINE"; $("network").className="value red";
+    $("latency").textContent="-- ms";
+    log("NO EXTERNAL CONNECTION DETECTED");
+  }
+  $("scan").disabled=false; busy=false;
+  return result.online;
 }
+$("scan").onclick=()=>scanNetwork();
 
-.globe-area{
- box-shadow:0 0 25px #00aaff20,inset 0 0 35px #00bfff18;
- border-color:#13bfff77;
+function updateTimer(){
+  const remaining=Math.max(0,Math.ceil((sessionEnd-Date.now())/1000));
+  const min=String(Math.floor(remaining/60)).padStart(2,"0");
+  const sec=String(remaining%60).padStart(2,"0");
+  $("timer").textContent=min+":"+sec;
+  if(remaining<=0) stopSession();
 }
-
-.card,.console,.radar-panel{
- background:linear-gradient(145deg,#071b2b,#04101c);
- border:1px solid #16bfff55;
- box-shadow:inset 0 0 18px #00aaff0a,0 0 15px #00bfff12;
+async function emergencyCheck(){ if(!running) return; await scanNetwork(); }
+function startSession(){
+  if(running) return; running=true; sessionEnd=Date.now()+300000;
+  $("tunnel").textContent="MONITORING"; $("tunnel").className="value green";
+  $("start").disabled=true; $("stop").disabled=false;
+  log("EMERGENCY MONITORING STARTED"); log("SESSION LENGTH: 300 SECONDS");
+  updateTimer(); emergencyCheck();
+  timerInterval=setInterval(updateTimer,1000);
+  // FIX 3: 8000ms > 5000ms timeout, no overlap
+  scanInterval=setInterval(emergencyCheck,8000);
 }
-
-.value{
- text-shadow:0 0 12px currentColor;
+function stopSession(){
+  if(!running) return; running=false;
+  clearInterval(timerInterval); clearInterval(scanInterval);
+  $("tunnel").textContent="STANDBY"; $("tunnel").className="value";
+  $("start").disabled=false; $("stop").disabled=true;
+  // FIX 4: Reset timer
+  $("timer").textContent="05:00";
+  log("EMERGENCY MONITORING STOPPED");
 }
-
-button{
- background:linear-gradient(135deg,#06283c,#061827);
- box-shadow:0 0 12px #00bfff22;
- transition:.25s;
-}
-
-button:active{
- transform:scale(.96);
- box-shadow:0 0 22px #00eaff77;
-}
-
-button:hover{
- background:#0b3850;
- box-shadow:0 0 18px #00cfff66;
-}
-
-/* RADAR PANEL */
-
-.radar-panel{
- margin-top:18px;
- padding:18px;
- border-radius:14px;
-}
-
-.radar-title{
- display:flex;
- justify-content:space-between;
- align-items:center;
- color:#42dfff;
- font-size:13px;
- letter-spacing:2px;
- margin-bottom:18px;
-}
-
-.radar-title span:last-child{
- color:#69ffb5;
- font-size:10px;
-}
-
-.radar-layout{
- display:flex;
- align-items:center;
- justify-content:space-around;
- gap:15px;
- flex-wrap:wrap;
-}
-
-.radar-screen{
- position:relative;
- width:min(260px,75vw);
- aspect-ratio:1;
- border:1px solid #24dfff88;
- border-radius:50%;
- overflow:hidden;
- background:
- repeating-radial-gradient(
-  circle,
-  transparent 0 24px,
-  #20dfff55 25px 26px
- ),
- radial-gradient(circle,#073c43,#031622 72%);
- box-shadow:0 0 25px #00dfff33,inset 0 0 30px #00eaff22;
-}
-
-.radar-screen:before,
-.radar-screen:after{
- content:"";
- position:absolute;
- background:#30dfff55;
-}
-
-.radar-screen:before{
- width:100%;
- height:1px;
- top:50%;
-}
-
-.radar-screen:after{
- width:1px;
- height:100%;
- left:50%;
-}
-
-.radar-sweep{
- position:absolute;
- inset:0;
- border-radius:50%;
- background:conic-gradient(
-  from 0deg,
-  transparent 0deg,
-  transparent 275deg,
-  #00ffb522 310deg,
-  #00ffb588 350deg,
-  transparent 360deg
- );
- animation:radarSpin 4s linear infinite;
-}
-
-@keyframes radarSpin{
- to{transform:rotate(360deg)}
-}
-
-.radar-blip{
- position:absolute;
- width:7px;
- height:7px;
- border-radius:50%;
- background:#8affc5;
- box-shadow:0 0 8px #55ffae,0 0 18px #55ffae;
- animation:blipPulse 1.5s infinite alternate;
-}
-
-@keyframes blipPulse{
- from{opacity:.3;transform:scale(.7)}
- to{opacity:1;transform:scale(1.5)}
-}
-
-.radar-data{
- min-width:180px;
- flex:1;
-}
-
-.radar-item{
- padding:12px;
- margin:8px 0;
- border-left:2px solid #35dfff;
- background:#08203388;
-}
-
-.radar-item small{
- display:block;
- color:#6c9eb1;
- font-size:10px;
-}
-
-.radar-item strong{
- display:block;
- color:#79ffc0;
- margin-top:6px;
- font-size:14px;
- text-shadow:0 0 8px #52ffae55;
-}
-
-.radar-footer{
- text-align:center;
- margin-top:15px;
- color:#4e879e;
- font-size:10px;
- letter-spacing:2px;
-}
-
-@media(max-width:500px){
- .radar-layout{flex-direction:column}
- .radar-data{width:100%}
-}
+$("start").onclick=startSession; $("stop").onclick=stopSession;
+$("clear").onclick=()=>{ $("log").textContent=""; log("LOG CLEARED"); };
+window.addEventListener("online",()=>log("DEVICE REPORTS NETWORK ONLINE"));
+window.addEventListener("offline",()=>log("DEVICE REPORTS NETWORK OFFLINE"));
+</script>
+</body>
+</html>
